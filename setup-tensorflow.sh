@@ -26,7 +26,15 @@ PY_VER="$1"; shift
 ( echo "$PY_VER" | grep -Eq '^[23]\.[0-9]$' ) && echo "Python version check: OK" || syntax_error
 
 PYTHON_VERSION_INT=$(echo "$PY_VER" | egrep -o '^[23]')
-DOCKER_IMG_NAME="tensorflow/tensorflow:$TF_VER-devel-gpu-py$PYTHON_VERSION_INT"
+
+DOCKER_OPTIONS="$1"
+if [ -z "$DOCKER_OPTIONS" ]; then
+    DOCKER_OPTIONS="-devel-gpu-py$PYTHON_VERSION_INT"
+else
+    DOCKER_OPTIONS="-gpu"
+fi
+
+DOCKER_IMG_NAME="tensorflow/tensorflow:$TF_VER$DOCKER_OPTIONS"
 echo "Tensorflow branch name $BRANCH_NAME"
 
 setup_dependencies_version(){
@@ -91,7 +99,7 @@ setup_dependencies_version(){
             BAZEL_VER="0.27.1"
         ;;
 
-        "2.2" | "master" )
+        "2.2" | "2.3" | "2.4" | "master" )
             GCC_VER="7.3.1"
             BAZEL_VER="3.1.0"
         ;;
@@ -124,9 +132,14 @@ setup_dependencies_version(){
             CUDA_VER="10.1"
         ;;
 
-        "2.2" | "master")
+        "2.2" | "2.3" )
             cuDNN_VER="7.6"
             CUDA_VER="10.1"
+        ;;
+
+        "2.4" | "master" )
+            cuDNN_VER="8.0"
+            CUDA_VER="11.0"
         ;;
     esac
 
@@ -231,7 +244,7 @@ docker_compile_tensorflow() {
         -e CUDDNN_VER_SHORT=$cuDNN_VER_SHORT \
         -e BRANCH_NAME=$BRANCH_NAME \
         -e BAZEL_VER=$BAZEL_VER \
-        tensorflow-compiler sh launch.sh &&
+        tensorflow-compiler sh build.sh &&
     
     if [ -z "$(python -c 'import platform; print(platform.python_version())' | grep 3)" ]; then
         py_whl="$(find $TF_OUT_DIR -type f \( -iname tensorflow-$TF_VER\*2\*.whl \) -exec realpath {} \;)" &&
