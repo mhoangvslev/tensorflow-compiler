@@ -99,10 +99,16 @@ setup_dependencies_version(){
             BAZEL_VER="0.27.1"
         ;;
 
-        "2.2" | "2.3" | "2.4" | "master" )
+        "2.2" | "2.3" | "2.4" )
             GCC_VER="7.3.1"
             BAZEL_VER="3.1.0"
         ;;
+
+        "master" )
+            GCC_VER="7.3.1"
+            BAZEL_VER="3.7.2"
+        ;;
+
     esac
     
     # https://www.tensorflow.org/install/source#gpu
