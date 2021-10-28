@@ -92,12 +92,34 @@ ENV INFOPATH="$(realpath share/info):${INFOPATH}"
 
 RUN gcc --version
 
+# CUDA
+ARG CUDA_DL_HTTP
+ENV CUDA_DL_HTTP=${CUDA_DL_HTTP}
+
+ARG CUDA_VER
+ENV CUDA_VER=${CUDA_VER}
+
+WORKDIR /root/
+ENV CUDA_HTTP="https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64"
+RUN wget ${CUDA_HTTP}/cuda-ubuntu1804.pin \
+    && mv cuda-ubuntu1804.pin /etc/apt/preferences.d/cuda-repository-pin-600 \
+    && wget ${CUDA_DL_HTTP} -O cuda.deb \
+    && sudo dpkg -i cuda.deb \
+    && sudo apt-key add /var/cuda-repo-ubuntu1804-11-2-local/7fa2af80.pub \
+    && apt update && apt install -y cuda
+
 # Tensorflow
 ARG TF_VER
 ENV TF_VER=${TF_VER}
 
 ARG BRANCH_NAME
 ENV BRANCH_NAME=${BRANCH_NAME}
+
+ARG cuDNN_VER
+ENV cuDNN_VER=${cuDNN_VER}
+
+ARG cuDNN_VER_SHORT
+ENV cuDNN_VER_SHORT=${cuDNN_VER_SHORT}
 
 WORKDIR /root/
 RUN git clone https://github.com/tensorflow/tensorflow.git -b "r${BRANCH_NAME}"

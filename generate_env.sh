@@ -90,7 +90,7 @@ setup_dependencies_version(){
         
         "1.3" | "1.4")
             cuDNN_VER="6"
-            CUDA_VER="8"
+            CUDA_VER="8.0"
         ;;
         
         "1.5"| "1.6"| "1.7"| "1.8"| "1.9"| "1.10"| "1.11"| "1.12" )
@@ -158,6 +158,32 @@ echo $(($(nproc)*2))
 echo "Python version ?"
 read PYTHON_VER
 
+case $CUDA_VER in 
+    "11.2" )
+        CUDA_DL_HTTP="https://developer.download.nvidia.com/compute/cuda/11.2.2/local_installers/cuda-repo-ubuntu1804-11-2-local_11.2.2-460.32.03-1_amd64.deb"
+    ;;
+
+    "11.4" )
+        CUDA_DL_HTTP="https://developer.download.nvidia.com/compute/cuda/11.4.2/local_installers/cuda-repo-ubuntu1804-11-4-local_11.4.2-470.57.02-1_amd64.deb"
+    ;;
+
+    "10.0" )
+        CUDA_DL_HTTP="https://developer.nvidia.com/compute/cuda/10.0/Prod/local_installers/cuda-repo-ubuntu1804-10-0-local-10.0.130-410.48_1.0-1_amd64"
+    ;;
+
+    "10.1" )
+        CUDA_DL_HTTP="https://developer.nvidia.com/compute/cuda/10.1/Prod/local_installers/cuda-repo-ubuntu1810-10-1-local-10.1.105-418.39_1.0-1_amd64.deb"
+    ;;
+
+    "9.1" )
+        CUDA_DL_HTTP="https://developer.nvidia.com/compute/cuda/9.1/Prod/local_installers/cuda-repo-ubuntu1604-9-1-local_9.1.85-1_amd64"
+    ;;
+
+    "8.0" )
+        CUDA_DL_HTTP="https://developer.nvidia.com/compute/cuda/8.0/Prod2/local_installers/cuda-repo-ubuntu1604-8-0-local-ga2_8.0.61-1_amd64-deb"
+    ;;
+esac
+
 echo "#!/usr/bin/env bash" > .env
 echo "TF_VER=$TF_VER" >> .env
 echo "BRANCH_NAME=$BRANCH_NAME" >> .env
@@ -167,4 +193,5 @@ echo "GCC_VER_SHORT=$GCC_VER_SHORT" >> .env
 echo "BAZEL_VER=$BAZEL_VER" >> .env
 echo "cuDNN_VER=$cuDNN_VER" >> .env
 echo "cuDNN_VER_SHORT=$cuDNN_VER_SHORT" >> .env
-
+echo "CUDA_VER=$CUDA_VER" >> .env
+echo "CUDA_DL_HTTP=$CUDA_DL_HTTP" >> .env

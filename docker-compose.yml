@@ -12,7 +12,27 @@ services:
         GCC_VER:
         GCC_VER_SHORT:
         BAZEL_VER:
-        cuDNN_VER:
-        cuDNN_VER_SHORT:
     volumes:
       - './tensorflow:/tmp/tensorflow_pkg'
+    entrypoint: 'conda run --no-capture-output -n xp /bin/bash'
+  
+  tensorflow-compiler-gpu:
+    container_name: "tensorflow-compiler-gpu"
+    build:
+      context: .
+      dockerfile: tensorflow-gpu.Dockerfile
+      args:
+        TF_VER:
+        BRANCH_NAME:
+        PYTHON_VER:
+        GCC_VER:
+        GCC_VER_SHORT:
+        BAZEL_VER:
+        cuDNN_VER:
+        cuDNN_VER_SHORT:
+        CUDA_VER:
+        CUDA_DL_HTTP:
+    volumes:
+      - './tensorflow:/tmp/tensorflow_pkg'
+    
+    
