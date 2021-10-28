@@ -1,0 +1,4 @@
+tf/
+docker-tf/
+
+.env

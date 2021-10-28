@@ -1,0 +1,18 @@
+version: '3'
+services:
+  tensorflow-compiler-cpu:
+    container_name: "tensorflow-compiler-cpu"
+    build:
+      context: .
+      dockerfile: tensorflow-cpu.Dockerfile
+      args:
+        TF_VER:
+        BRANCH_NAME:
+        PYTHON_VER:
+        GCC_VER:
+        GCC_VER_SHORT:
+        BAZEL_VER:
+        cuDNN_VER:
+        cuDNN_VER_SHORT:
+    volumes:
+      - './tensorflow:/tmp/tensorflow_pkg'
