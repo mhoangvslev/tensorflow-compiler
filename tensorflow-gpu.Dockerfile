@@ -23,17 +23,6 @@ RUN echo "Python ${PYTHON_VER}" && conda install "python=${PYTHON_VER}"
 RUN pip install pip numpy wheel 
 RUN pip install keras_preprocessing --no-deps
 
-# Bazel
-ARG BAZEL_VER
-ENV BAZEL_VER=${BAZEL_VER}
-
-RUN echo "Installing Bazel for Linux" \
-    && wget "https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VER}/bazel-${BAZEL_VER}-installer-linux-x86_64.sh" \
-        -O "bazel-${BAZEL_VER}-installer-linux-x86_64.sh" \
-    && bash ./"bazel-${BAZEL_VER}-installer-linux-x86_64.sh" \
-    && rm "bazel-${BAZEL_VER}-installer-linux-x86_64.sh" \
-    && bazel version
-
 # GCC
 ARG GCC_VER
 ENV GCC_VER=${GCC_VER}
@@ -126,6 +115,24 @@ RUN git clone https://github.com/tensorflow/tensorflow.git -b "r${BRANCH_NAME}"
 
 WORKDIR /root/tensorflow/
 VOLUME ["/tmp/tensorflow_pkg"]
+
+## Bazel
+ARG BAZEL_VER
+ENV BAZEL_VER=${BAZEL_VER}
+
+# RUN echo "Installing Bazel for Linux" \
+#     && wget "https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VER}/bazel-${BAZEL_VER}-installer-linux-x86_64.sh" \
+#         -O "bazel-${BAZEL_VER}-installer-linux-x86_64.sh" \
+#     && bash ./"bazel-${BAZEL_VER}-installer-linux-x86_64.sh" \
+#     && rm "bazel-${BAZEL_VER}-installer-linux-x86_64.sh" \
+#     && bazel version
+
+# Bazel
+RUN wget https://github.com/bazelbuild/bazelisk/releases/download/v1.10.1/bazelisk-linux-amd64 \
+    -O /usr/local/bin/bazel \
+    && chmod +x /usr/local/bin/bazel \
+    && echo ${BAZEL_VER} > .bazelversion \
+    && bazel version 
 
 COPY build.sh .
 RUN chmod +x build.sh
