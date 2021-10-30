@@ -19,8 +19,8 @@ sh generate_env.sh
 2. Launch the docker-compose
 ```bash
 
-docker-compose build tensorflow-compiler-<gpu|cpu>
-docker-compose run --rm tensorflow-compiler-<gpu|cpu> 
+docker-compose build [--no-cache] tensorflow-compiler-<gpu|cpu>
+docker-compose run -it --rm --network host tensorflow-compiler-<gpu|cpu> 
 
 # When inside the docker container, run:
 sh build.sh
@@ -28,5 +28,14 @@ sh build.sh
 # Or do whatever you want 
 ```
 
+3. Retrieve compiled `.whl` file at host's `tensorflow` directory:
+```bash
+# In a new terminal
+cd  tensorflow-compiler/
+cp tensorflow/tensorflow_<tf_ver>.py<py_ver>.whl path/to/permanant/storage/
+pip install path/to/permanant/storage/tensorflow_<tf_ver>.py<py_ver>.whl
+
+```
+
 # Contribution
-- While the Dockerfiles are stable, the environment variable generator needs constant synchronisation with newer version of Tensorflow. 
+- While the Dockerfiles are stable, the environment variable generator needs constant synchronisation with [Tensorflow's official tested build configuration](https://www.tensorflow.org/install/source?hl=lt#tested_build_configurations). 
