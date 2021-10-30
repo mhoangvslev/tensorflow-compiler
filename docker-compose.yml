@@ -2,10 +2,14 @@ version: '3'
 services:
   tensorflow-compiler-cpu:
     container_name: "tensorflow-compiler-cpu"
+    network_mode: host
     build:
       context: .
       dockerfile: tensorflow-cpu.Dockerfile
+      network: "host"
       args:
+        HTTP_PROXY:
+        HTTPS_PROXY:
         TF_VER:
         BRANCH_NAME:
         PYTHON_VER:
@@ -14,14 +18,17 @@ services:
         BAZEL_VER:
     volumes:
       - './tensorflow:/tmp/tensorflow_pkg'
-    entrypoint: 'conda run --no-capture-output -n xp /bin/bash'
   
   tensorflow-compiler-gpu:
     container_name: "tensorflow-compiler-gpu"
+    network_mode: host
     build:
       context: .
       dockerfile: tensorflow-gpu.Dockerfile
+      network: "host"
       args:
+        HTTP_PROXY:
+        HTTPS_PROXY:
         TF_VER:
         BRANCH_NAME:
         PYTHON_VER:
