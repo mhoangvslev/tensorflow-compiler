@@ -2,3 +2,5 @@ tf/
 docker-tf/
 
 .env
+
+tensorflow/

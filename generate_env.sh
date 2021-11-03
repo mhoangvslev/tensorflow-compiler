@@ -132,7 +132,7 @@ setup_dependencies_version(){
     cuDNN_VER_SHORT=$(echo "$cuDNN_VER" | egrep -o '^[0-9]{1,2}')
     echo "cuDNN_VER = $cuDNN_VER; CUDA_VER = $CUDA_VER"
     echo "GCC_VER = $GCC_VER; BAZEL_VER = $BAZEL_VER"
-    GCC_VER_SHORT="$(echo $GCC_VER | egrep -o '^[0-9]+\.[0-9]+').0"
+    GCC_VER_SHORT="$(echo $GCC_VER | egrep -o '^[0-9]+\.[0-9]+')"
 }
 
 #============================
@@ -183,6 +183,18 @@ case $CUDA_VER in
         CUDA_DL_HTTP="https://developer.nvidia.com/compute/cuda/8.0/Prod2/local_installers/cuda-repo-ubuntu1604-8-0-local-ga2_8.0.61-1_amd64-deb"
     ;;
 esac
+
+if  wget -q https://registry.hub.docker.com/v1/repositories/gcc/tags -O - \
+    | sed -e 's/[][]//g' -e 's/"//g' -e 's/ //g' \
+    | tr '}' '\n' \
+    | awk -F: '{print $3}' \
+    | grep ${GCC_VER}
+then
+    echo "GCC version ${GCC_VER} is available..."
+else
+    echo "GCC version ${GCC_VER} is not available, setting GCC to ${GCC_VER_SHORT}"
+    GCC_VER=$GCC_VER_SHORT
+fi
 
 echo "#!/usr/bin/env bash" > .env
 echo "TF_VER=$TF_VER" >> .env

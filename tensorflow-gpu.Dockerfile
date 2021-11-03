@@ -1,4 +1,5 @@
-FROM ubuntu:18.04
+ARG GCC_VER
+FROM gcc:${GCC_VER}
 
 ENV http_proxy=${HTTP_PROXY}
 ENV https_proxy=${HTTPS_PROXY}

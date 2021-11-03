@@ -1,4 +1,5 @@
-FROM ubuntu:18.04
+ARG GCC_VER
+FROM gcc:${GCC_VER}
 
 ENV http_proxy=${HTTP_PROXY}
 ENV https_proxy=${HTTPS_PROXY}
@@ -8,7 +9,7 @@ ARG PYTHON_VER
 ENV PYTHON_VER=${PYTHON_VER}
 
 RUN apt-get update \
-    && apt-get install -y wget curl git build-essential unzip autoconf automake gettext gperf autogen guile-2.2 flex libz-dev
+    && apt-get install -y wget curl git
 
 # Miniconda
 ENV PATH="/root/miniconda3/bin:${PATH}"
