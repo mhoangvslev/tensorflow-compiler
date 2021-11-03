@@ -3,7 +3,7 @@ Script to setup and compile tensorflow from scratch
 
 # Motivation
 Compiling Tensorflow from source help accelerate training time. However, it's not an easy task. 
-Users usually face 3 majors problems:
+Users usually face 4 majors problems:
 - Packages are not available on their current version of Ubuntu
 - Messy, inflated storage after installing build tools
 - Official Docker devel images do not support every version of Tensorflow
@@ -39,3 +39,4 @@ pip install path/to/permanant/storage/tensorflow_<tf_ver>.py<py_ver>.whl
 
 # Contribution
 - While the Dockerfiles are stable, the environment variable generator needs constant synchronisation with [Tensorflow's official tested build configuration](https://www.tensorflow.org/install/source?hl=lt#tested_build_configurations). 
+- Report issues and suggestions to Issue section.
