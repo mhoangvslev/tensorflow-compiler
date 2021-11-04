@@ -191,6 +191,18 @@ do
     read PYTHON_VER
 done
 
+# Check Numpy version
+NUMPY_VER="None"
+until [ $(pip index versions numpy \
+        | grep 'Available versions:' \
+        | sed 's/Available versions: //' \
+        | awk 'gsub(/, /, "\n")' \
+        | grep -x ${NUMPY_VER}) ]
+do
+    echo "Numpy version ?"
+    read NUMPY_VER
+done
+
 # Check GCC version
 if  wget -q https://registry.hub.docker.com/v1/repositories/gcc/tags -O - \
     | sed -e 's/[][]//g' -e 's/"//g' -e 's/ //g' \
@@ -222,6 +234,7 @@ echo "#!/usr/bin/env bash" > .env
 echo "TF_VER=$TF_VER" >> .env
 echo "BRANCH_NAME=$BRANCH_NAME" >> .env
 echo "PYTHON_VER=$PYTHON_VER" >> .env
+echo "NUMPY_VER=$NUMPY_VER" >> .env
 echo "GCC_VER=$GCC_VER" >> .env
 echo "GCC_VER_SHORT=$GCC_VER_SHORT" >> .env
 echo "BAZEL_VER=$BAZEL_VER" >> .env

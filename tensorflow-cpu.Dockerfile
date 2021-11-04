@@ -8,6 +8,9 @@ ENV all_proxy=${HTTP_PROXY}
 ARG PYTHON_VER
 ENV PYTHON_VER=${PYTHON_VER}
 
+ARG NUMPY_VER
+ENV NUMPY_VER=${NUMPY_VER}
+
 RUN apt-get update \
     && apt-get install -y wget curl git
 
@@ -24,67 +27,11 @@ RUN wget \
 RUN conda create -n xp
 SHELL ["conda", "run", "--no-capture-output", "-n", "xp", "/bin/bash", "-c"]
 RUN echo "Python ${PYTHON_VER}" && conda install "python=${PYTHON_VER}"
-RUN pip install pip numpy wheel \
+RUN pip install pip numpy==${NUMPY_VER} wheel \
     && pip install keras_applications --no-deps \
     && pip install keras_preprocessing --no-deps \
     && conda init bash \
     && echo "conda activate xp" >> ~/.bashrc
-
-# GCC
-# ARG GCC_VER
-# ENV GCC_VER=${GCC_VER}
-
-# ARG GCC_VER_SHORT
-# ENV GCC_VER_SHORT=${GCC_VER_SHORT}
-
-# RUN wget "https://github.com/gcc-mirror/gcc/archive/refs/tags/releases/gcc-${GCC_VER}.tar.gz" \
-#      -O "gcc-${GCC_VER}.tar.gz" \
-#     || wget "https://github.com/gcc-mirror/gcc/archive/refs/tags/releases/gcc-${GCC_VER_SHORT}.tar.gz" \
-#      -O "gcc-${GCC_VER}.tar.gz" \
-#     && tar -xvf "gcc-${GCC_VER}.tar.gz" --strip-components=1 --one-top-level=/root/gcc-${GCC_VER}
-
-# WORKDIR /root/gcc-${GCC_VER}
-
-# ENV CC=gcc
-# ENV CXX=g++
-# ENV OPT_FLAGS="-O2"
-# ENV CC="$CC" 
-# ENV CXX="$CXX" 
-# ENV CFLAGS="$OPT_FLAGS" 
-
-# RUN sed -i "s|ftp://gcc.gnu.org/pub/gcc/infrastructure/|https://gcc.gnu.org/pub/gcc/infrastructure/|g" ./contrib/download_prerequisites \
-#     && ./contrib/download_prerequisites --force
-
-# RUN CXXFLAGS="${OPT_FLAGS} -Wall" ./configure \
-#     --enable-bootstrap \
-#     --enable-shared \
-#     --enable-threads=posix \
-#     --enable-checking=release \
-#     --with-system-zlib \
-#     --enable-__cxa_atexit \
-#     --disable-libunwind-exceptions \
-#     --enable-linker-build-id \
-#     --enable-languages=c,c++,lto \
-#     --disable-vtable-verify \
-#     --with-default-libstdcxx-abi=new \
-#     --enable-libstdcxx-debug  \
-#     --without-included-gettext  \
-#     --enable-plugin \
-#     --disable-initfini-array \
-#     --disable-libgcj \
-#     --enable-plugin  \
-#     --disable-multilib \
-#     --with-tune=generic
-
-# RUN make -j $(($(nproc)*2)) BOOT_CFLAGS="$OPT_FLAGS" bootstrap
-# RUN make install-strip
-
-# ENV PATH="$(realpath ./bin/):${PATH}"
-# ENV LD_LIBRARY_PATH="$(realpath lib):lib64:${LD_LIBRARY_PATH}"
-# ENV MANPATH="$(realpath share/man):${MANPATH}"
-# ENV INFOPATH="$(realpath share/info):${INFOPATH}"
-
-# RUN gcc --version
 
 # Tensorflow
 ARG TF_VER

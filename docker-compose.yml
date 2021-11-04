@@ -13,7 +13,8 @@ services:
         TF_VER:
         BRANCH_NAME:
         PYTHON_VER:
-        GCC_VER: ${GCC_VER}
+        NUMPY_VER:
+        GCC_VER:
         GCC_VER_SHORT:
         BAZEL_VER:
     volumes:
@@ -32,6 +33,7 @@ services:
         TF_VER:
         BRANCH_NAME:
         PYTHON_VER:
+        NUMPY_VER:
         GCC_VER:
         GCC_VER_SHORT:
         BAZEL_VER:
