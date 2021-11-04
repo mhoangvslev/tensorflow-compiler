@@ -80,6 +80,7 @@ setup_dependencies_version(){
         ;;
 
     esac
+    GCC_VER_SHORT="$(echo $GCC_VER | egrep -o '^[0-9]+\.[0-9]+')"
 
     # https://www.tensorflow.org/install/source#gpu
     case $BRANCH_NAME in
@@ -129,10 +130,31 @@ setup_dependencies_version(){
         ;;
     esac
 
-    cuDNN_VER_SHORT=$(echo "$cuDNN_VER" | egrep -o '^[0-9]{1,2}')
-    echo "cuDNN_VER = $cuDNN_VER; CUDA_VER = $CUDA_VER"
-    echo "GCC_VER = $GCC_VER; BAZEL_VER = $BAZEL_VER"
-    GCC_VER_SHORT="$(echo $GCC_VER | egrep -o '^[0-9]+\.[0-9]+')"
+    case $CUDA_VER in 
+        "11.2" )
+            CUDA_DL_HTTP="https://developer.download.nvidia.com/compute/cuda/11.2.2/local_installers/cuda-repo-ubuntu1804-11-2-local_11.2.2-460.32.03-1_amd64.deb"
+        ;;
+
+        "11.4" )
+            CUDA_DL_HTTP="https://developer.download.nvidia.com/compute/cuda/11.4.2/local_installers/cuda-repo-ubuntu1804-11-4-local_11.4.2-470.57.02-1_amd64.deb"
+        ;;
+
+        "10.0" )
+            CUDA_DL_HTTP="https://developer.nvidia.com/compute/cuda/10.0/Prod/local_installers/cuda-repo-ubuntu1804-10-0-local-10.0.130-410.48_1.0-1_amd64"
+        ;;
+
+        "10.1" )
+            CUDA_DL_HTTP="https://developer.nvidia.com/compute/cuda/10.1/Prod/local_installers/cuda-repo-ubuntu1810-10-1-local-10.1.105-418.39_1.0-1_amd64.deb"
+        ;;
+
+        "9.1" )
+            CUDA_DL_HTTP="https://developer.nvidia.com/compute/cuda/9.1/Prod/local_installers/cuda-repo-ubuntu1604-9-1-local_9.1.85-1_amd64"
+        ;;
+
+        "8.0" )
+            CUDA_DL_HTTP="https://developer.nvidia.com/compute/cuda/8.0/Prod2/local_installers/cuda-repo-ubuntu1604-8-0-local-ga2_8.0.61-1_amd64-deb"
+        ;;
+    esac
 }
 
 #============================
@@ -142,8 +164,16 @@ setup_dependencies_version(){
 echo "Please refer to the following document for information:"
 echo "https://www.tensorflow.org/install/source#linux"
 
-echo "Tensorflow version ?"
-read TF_VER
+TF_VER="None"
+until [ $(wget -q https://registry.hub.docker.com/v1/repositories/tensorflow/tensorflow/tags -O - \
+    | sed -e 's/[][]//g' -e 's/"//g' -e 's/ //g' \
+    | tr '}' '\n' \
+    | awk -F: '{print $3}' \
+    | grep -x ${TF_VER}) ]
+do
+    echo "Tensorflow version ?"
+    read TF_VER
+done
 
 if [ "$TF_VER" = "latest" ]; then 
     BRANCH_NAME="master";
@@ -153,37 +183,15 @@ fi
 
 setup_dependencies_version
 
-echo $(($(nproc)*2))
+# Check Python version
+PYTHON_VER="None"
+until [ $(conda search python | awk '{if (NR > 2) {print $2} }' | uniq | grep -x ${PYTHON_VER}) ]
+do
+    echo "Python version ?"
+    read PYTHON_VER
+done
 
-echo "Python version ?"
-read PYTHON_VER
-
-case $CUDA_VER in 
-    "11.2" )
-        CUDA_DL_HTTP="https://developer.download.nvidia.com/compute/cuda/11.2.2/local_installers/cuda-repo-ubuntu1804-11-2-local_11.2.2-460.32.03-1_amd64.deb"
-    ;;
-
-    "11.4" )
-        CUDA_DL_HTTP="https://developer.download.nvidia.com/compute/cuda/11.4.2/local_installers/cuda-repo-ubuntu1804-11-4-local_11.4.2-470.57.02-1_amd64.deb"
-    ;;
-
-    "10.0" )
-        CUDA_DL_HTTP="https://developer.nvidia.com/compute/cuda/10.0/Prod/local_installers/cuda-repo-ubuntu1804-10-0-local-10.0.130-410.48_1.0-1_amd64"
-    ;;
-
-    "10.1" )
-        CUDA_DL_HTTP="https://developer.nvidia.com/compute/cuda/10.1/Prod/local_installers/cuda-repo-ubuntu1810-10-1-local-10.1.105-418.39_1.0-1_amd64.deb"
-    ;;
-
-    "9.1" )
-        CUDA_DL_HTTP="https://developer.nvidia.com/compute/cuda/9.1/Prod/local_installers/cuda-repo-ubuntu1604-9-1-local_9.1.85-1_amd64"
-    ;;
-
-    "8.0" )
-        CUDA_DL_HTTP="https://developer.nvidia.com/compute/cuda/8.0/Prod2/local_installers/cuda-repo-ubuntu1604-8-0-local-ga2_8.0.61-1_amd64-deb"
-    ;;
-esac
-
+# Check GCC version
 if  wget -q https://registry.hub.docker.com/v1/repositories/gcc/tags -O - \
     | sed -e 's/[][]//g' -e 's/"//g' -e 's/ //g' \
     | tr '}' '\n' \
@@ -195,6 +203,20 @@ else
     echo "GCC version ${GCC_VER} is not available, setting GCC to ${GCC_VER_SHORT}"
     GCC_VER=$GCC_VER_SHORT
 fi
+
+SYSTEM_GCC_VER=$(gcc --version | egrep -o '[0-9]+(\.[0-9]+)+' | head -1)
+echo "Override GCC version with system's version ($SYSTEM_GCC_VER)? (y/N)"
+read response
+
+if [ "$response" = "y" ]; then 
+    GCC_VER=$SYSTEM_GCC_VER 
+fi
+
+# Summary
+cuDNN_VER_SHORT=$(echo "$cuDNN_VER" | egrep -o '^[0-9]{1,2}')
+echo "cuDNN_VER = $cuDNN_VER; CUDA_VER = $CUDA_VER"
+echo "GCC_VER = $GCC_VER; BAZEL_VER = $BAZEL_VER"
+GCC_VER_SHORT="$(echo $GCC_VER | egrep -o '^[0-9]+\.[0-9]+')"
 
 echo "#!/usr/bin/env bash" > .env
 echo "TF_VER=$TF_VER" >> .env
