@@ -52,13 +52,6 @@ VOLUME ["/tmp/tensorflow_pkg"]
 ARG BAZEL_VER
 ENV BAZEL_VER=${BAZEL_VER}
 
-# RUN echo "Installing Bazel for Linux" \
-#     && wget "https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VER}/bazel-${BAZEL_VER}-installer-linux-x86_64.sh" \
-#         -O "bazel-${BAZEL_VER}-installer-linux-x86_64.sh" \
-#     && bash ./"bazel-${BAZEL_VER}-installer-linux-x86_64.sh" \
-#     && rm "bazel-${BAZEL_VER}-installer-linux-x86_64.sh" \
-#     && bazel version
-
 # Bazel
 RUN wget https://github.com/bazelbuild/bazelisk/releases/download/v1.10.1/bazelisk-linux-amd64 \
     -O /usr/local/bin/bazel \

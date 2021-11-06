@@ -130,31 +130,8 @@ setup_dependencies_version(){
         ;;
     esac
 
-    case $CUDA_VER in 
-        "11.2" )
-            CUDA_DL_HTTP="https://developer.download.nvidia.com/compute/cuda/11.2.2/local_installers/cuda-repo-ubuntu1804-11-2-local_11.2.2-460.32.03-1_amd64.deb"
-        ;;
+    cuDNN_VER_SHORT=$(echo "$cuDNN_VER" | egrep -o '^[0-9]{1,2}')
 
-        "11.4" )
-            CUDA_DL_HTTP="https://developer.download.nvidia.com/compute/cuda/11.4.2/local_installers/cuda-repo-ubuntu1804-11-4-local_11.4.2-470.57.02-1_amd64.deb"
-        ;;
-
-        "10.0" )
-            CUDA_DL_HTTP="https://developer.nvidia.com/compute/cuda/10.0/Prod/local_installers/cuda-repo-ubuntu1804-10-0-local-10.0.130-410.48_1.0-1_amd64"
-        ;;
-
-        "10.1" )
-            CUDA_DL_HTTP="https://developer.nvidia.com/compute/cuda/10.1/Prod/local_installers/cuda-repo-ubuntu1810-10-1-local-10.1.105-418.39_1.0-1_amd64.deb"
-        ;;
-
-        "9.1" )
-            CUDA_DL_HTTP="https://developer.nvidia.com/compute/cuda/9.1/Prod/local_installers/cuda-repo-ubuntu1604-9-1-local_9.1.85-1_amd64"
-        ;;
-
-        "8.0" )
-            CUDA_DL_HTTP="https://developer.nvidia.com/compute/cuda/8.0/Prod2/local_installers/cuda-repo-ubuntu1604-8-0-local-ga2_8.0.61-1_amd64-deb"
-        ;;
-    esac
 }
 
 #============================
@@ -224,11 +201,30 @@ if [ "$response" = "y" ]; then
     GCC_VER=$SYSTEM_GCC_VER 
 fi
 
+GCC_VER_SHORT="$(echo $GCC_VER | egrep -o '^[0-9]+\.[0-9]+')"
+
+# Check CUDA
+if  wget -q https://registry.hub.docker.com/v1/repositories/nvidia/cuda/tags -O - \
+    | sed -e 's/[][]//g' -e 's/"//g' -e 's/ //g' \
+    | tr '}' '\n' \
+    | awk -F: '{print $3}' \
+    | grep "${CUDA_VER}-"
+then
+    echo "Docker CUDA version ${CUDA_VER} is available..."
+else
+    CUDA_VER="${CUDA_VER}.0"
+    echo "Docker CUDA version ${CUDA_VER} is not available, setting CUDA to ${CUDA_VER}"
+fi
+
+if [ $(echo $CUDA_VER | egrep -o '^[0-9]+') -gt 10 ]; then
+    CUDA_DOCKER_TAG="$CUDA_VER-cudnn${cuDNN_VER_SHORT}-devel-ubuntu18.04"
+else
+    CUDA_DOCKER_TAG="$CUDA_VER-cudnn${cuDNN_VER_SHORT}-devel-ubuntu16.04"
+fi
+
 # Summary
-cuDNN_VER_SHORT=$(echo "$cuDNN_VER" | egrep -o '^[0-9]{1,2}')
 echo "cuDNN_VER = $cuDNN_VER; CUDA_VER = $CUDA_VER"
 echo "GCC_VER = $GCC_VER; BAZEL_VER = $BAZEL_VER"
-GCC_VER_SHORT="$(echo $GCC_VER | egrep -o '^[0-9]+\.[0-9]+')"
 
 echo "#!/usr/bin/env bash" > .env
 echo "TF_VER=$TF_VER" >> .env
@@ -241,4 +237,4 @@ echo "BAZEL_VER=$BAZEL_VER" >> .env
 echo "cuDNN_VER=$cuDNN_VER" >> .env
 echo "cuDNN_VER_SHORT=$cuDNN_VER_SHORT" >> .env
 echo "CUDA_VER=$CUDA_VER" >> .env
-echo "CUDA_DL_HTTP=$CUDA_DL_HTTP" >> .env
+echo "CUDA_DOCKER_TAG=$CUDA_DOCKER_TAG" >> .env
